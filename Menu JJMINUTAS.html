@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JJMinutas - Menú y Pedido</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f4f4;
+        }
+        .container {
+            max-width: 800px;
+            margin: auto;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        h1, h2 {
+            text-align: center;
+            color: #333;
+        }
+        .menu-category {
+            margin-bottom: 30px;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 20px;
+        }
+        .menu-category h3 {
+            color: #555;
+            border-bottom: 2px solid #007bff;
+            display: inline-block;
+            padding-bottom: 5px;
+            margin-bottom: 15px;
+        }
+        .menu-item {
+            background-color: #f9f9f9;
+            border: 1.5px solid #ddd;
+            border-radius: 5px;
+            padding: 15px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: background-color 0.3s, border-color 0.3s;
+            position: relative;
+            outline: none;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+        }
+        .menu-item:focus {
+            border-color: #007bff;
+            box-shadow: 0 0 0 2px #b3d7ff;
+        }
+        .menu-item:hover {
+            background-color: #e9e9e9;
+        }
+        .menu-item.selected {
+            border-color: #007bff;
+            background-color: #e0f0ff;
+        }
+        .menu-item.selected::after {
+            content: "✔";
+            color: #62c244;
+            font-size: 1.3em;
+            position: absolute;
+            bottom: 10px;
+            right: 15px;
+            background: #fff;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+        }
+        .menu-item h4 {
+            margin: 0 0 5px 0;
+            color: #333;
+        }
+        .menu-item p {
+            margin: 0;
+            color: #666;
+            font-size: 0.9em;
+        }
+        .price {
+            font-weight: bold;
+            color: #007bff;
+            float: right;
+        }
+        .cantidad-control {
+            display: flex;
+            align-items: center;
+            margin-top: 8px;
+            gap: 8px;
+        }
+        .cantidad-btn {
+            background: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 50%;
+            width: 26px;
+            height: 26px;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: background 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .cantidad-btn:disabled {
+            background: #b3d7ff;
+            cursor: not-allowed;
+        }
+        .cantidad-num {
+            min-width: 22px;
+            text-align: center;
+            font-weight: bold;
+            color: #007bff;
+        }
+        .limpiar-btn {
+            background: #dc3545;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            padding: 8px 18px;
+            font-size: 1em;
+            cursor: pointer;
+            margin-bottom: 0;
+            margin-top: 12px;
+            float: none;
+            width: 100%;
+            transition: background 0.2s;
+        }
+        .limpiar-btn:hover {
+            background: #b52a37;
+        }
+        .customer-form {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+        }
+        .customer-form label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #555;
+        }
+        .customer-form input[type="text"],
+        .customer-form input[type="tel"],
+        .customer-form select,
+        .customer-form textarea {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box; 
+        }
+        .customer-form textarea {
+            resize: vertical;
+            min-height: 40px;
+            max-height: 120px;
+        }
+        .customer-form button {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            background-color: #62c244; 
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        .customer-form button:hover {
+            background-color: #218838;
+        }
+        #cartelFlotante {
+            position: fixed;
+            right: 30px;
+            top: 30px;
+            background: rgba(0, 123, 255, 0.85);
+            padding: 12px 16px 12px 16px;
+            border-radius: 12px;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.18);
+            z-index: 9999;
+            min-width: 160px;
+            max-width: 220px;
+            transition: box-shadow 0.3s;
+            display: none;
+        }
+        #cartelFlotante ul {
+            max-height: 90px;
+            overflow-y: auto;
+        }
+        .producto-img {
+            width: 90px;
+            height: 70px;
+            object-fit: cover;
+            border-radius: 6px;
+            margin-bottom: 8px;
+            display: block;
+        }
+        @media (max-width: 600px) {
+            #cartelFlotante {
+                right: 10px;
+                top: 10px;
+                bottom: auto;
+                min-width: 90vw;
+                max-width: 95vw;
+                padding: 10px 8px;
+            }
+            .producto-img {
+                width: 70px;
+                height: 55px;
+            }
+            #modalImagen {
+                align-items: center !important;
+                justify-content: center !important;
+            }
+            #imgModal {
+                margin-top: 0 !important;
+                max-width: 98vw;
+                max-height: 60vh;
+            }
+            #cerrarModal {
+                top: 10px;
+                right: 16px;
+                font-size: 2em;
+                width: 38px;
+                height: 38px;
+            }
+        }
+
+        /* Estilos para el modal de imagen */
+        #modalImagen {
+            display: none;
+            position: fixed;
+            z-index: 10000;
+            left: 0;
+            top: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.7);
+            align-items: center;
+            justify-content: center;
+        }
+        #cerrarModal {
+            position: absolute;
+            top: 30px;
+            right: 40px;
+            color: #fff;
+            font-size: 2.5em;
+            font-weight: bold;
+            cursor: pointer;
+            z-index: 10001;
+            /* Borde negro para la cruz */
+            text-shadow: 
+                -1px -1px 0 #000,  
+                 1px -1px 0 #000,
+                -1px  1px 0 #000,
+                 1px  1px 0 #000;
+            border: 2px solid #000;
+            border-radius: 50%;
+            background: rgba(0,0,0,0.2);
+            width: 48px;
+            height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        #imgModal {
+            max-width: 90vw;
+            max-height: 80vh;
+            border-radius: 12px;
+            box-shadow: 0 4px 24px rgba(0, 0, 0, 0.5);
+            display: block;
+            margin: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>JJMinutas - Nuestro Menú</h1>
+
+        <!-- Cartel flotante del total y resumen del pedido -->
+        <div id="cartelFlotante" aria-live="polite">
+            <div style="font-weight:bold; color:#fff; font-size:1.1em;">Total del pedido</div>
+            <ul id="listaPedido" style="margin:10px 0 0 0; padding:0; list-style:none; color:#fff; font-size:0.98em;"></ul>
+            <div id="totalPedidoFlotante" style="font-size:1.2em; font-weight:bold; color:#fff; margin-top:10px;">Total: $0</div>
+            <button class="limpiar-btn" id="limpiarSeleccion" aria-label="Borrar pedido" style="float:none; width:100%; margin:12px 0 0 0;">Borrar pedido</button>
+        </div>
+
+        <!-- Aquí se generará el menú dinámicamente -->
+        <div id="menuDinamico"></div>
+
+        <div class="customer-form">
+            <h2>Datos del Cliente</h2>
+            <div id="resumenPedidoForm" style="display:none;"></div>
+            <form id="customerDetailsForm" autocomplete="off">
+                <div>
+                    <label for="nombre">Nombre:</label>
+                    <input type="text" id="nombre" name="nombre" required>
+                </div>
+                <div>
+                    <label for="direccion">Dirección:</label>
+                    <input type="text" id="direccion" name="direccion" required>
+                </div>
+                <div>
+                    <label for="telefono">Número de Teléfono:</label>
+                    <input type="tel" id="telefono" name="telefono" required pattern="[0-9]{8,15}" aria-label="Número de teléfono, solo números">
+                </div>
+                <div>
+                    <label for="pago">Forma de Pago:</label>
+                    <select id="pago" name="pago" required>
+                        <option value="">Selecciona una opción</option>
+                        <option value="Efectivo">Efectivo</option>
+                        <option value="Transferencia">Transferencia</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="notas">Notas adicionales:</label>
+                    <textarea id="notas" name="notas" placeholder="Aclaraciones, comentarios, etc."></textarea>
+                </div>
+                <button type="submit">Enviar Pedido por WhatsApp</button>
+            </form>
+            <div id="mensajeExito" style="display:none;">¡Pedido enviado! Revisa WhatsApp para finalizar tu pedido.</div>
+        </div>
+    </div>
+
+    <!-- Modal de imagen -->
+    <div id="modalImagen" style="display:none; position:fixed; z-index:10000; left:0; top:0; width:100vw; height:100vh; background:rgba(0,0,0,0.7); align-items:center; justify-content:center;">
+        <span id="cerrarModal">&times;</span>
+        <img id="imgModal" src="" alt="Imagen ampliada">
+    </div>
+
+    <script>
+    // CONFIGURA TU GOOGLE SHEET
+    // 1. Publica tu hoja de Google Sheets (Archivo > Compartir > Publicar en la web)
+    // 2. Copia el ID de la hoja y el nombre de la hoja (sheet)
+    // 3. Cambia las variables de abajo
+
+    // *** ESTAS VARIABLES HAN SIDO CONFIGURADAS CON LA INFORMACIÓN QUE PROPORCIONASTE ***
+    const SHEET_ID = '1oZlLNwrBNML0JygS7RYeJ9o68kGFdAGB6nYJTAbz7gM'; 
+    const SHEET_NAME = 'Productos';   
+    const SHEET_URL = `https://docs.google.com/spreadsheets/d/e/2PACX-1vSb9oSOgIoDPhTulisFf9sFiNdF_U-YPzDnh1QuF_1KxDQyr7iiu270SN0teTNxeWD9m2WXn5xdn5ex/pubhtml?gid=863348744&single=true`;
+    // *********************************************************************************
+
+    // Cargar productos desde Google Sheets
+    async function cargarProductosDesdeSheets() {
+        const resp = await fetch(SHEET_URL);
+        const csv = await resp.text();
+        const filas = csv.trim().split('\n').map(f => f.split(','));
+        const headers = filas[0].map(h => h.trim());
+        const productos = filas.slice(1).filter(f => f[0]).map(fila => {
+            let obj = {};
+            headers.forEach((h, i) => obj[h] = fila[i]);
+            return obj;
+        });
+
+        renderizarMenu(productos);
+    }
+
+    // Renderiza el menú agrupado por categoría
+    function renderizarMenu(productos) {
+        const menuDiv = document.getElementById('menuDinamico');
+        menuDiv.innerHTML = '';
+        // Agrupar por categoría
+        const categorias = {};
+        productos.forEach(prod => {
+            if (!categorias[prod.Categoría]) categorias[prod.Categoría] = [];
+            categorias[prod.Categoría].push(prod);
+        });
+
+        Object.keys(categorias).forEach(cat => {
+            const catDiv = document.createElement('div');
+            catDiv.className = 'menu-category';
+            catDiv.innerHTML = `<h3>${cat}</h3>`;
+            categorias[cat].forEach(prod => {
+                // Si hay stock o no se controla stock, mostrar
+                // Se añade una verificación para asegurar que prod.Stock es un número válido
+                const stock = parseInt(prod.Stock);
+                if (!prod.Stock || (typeof stock === 'number' && !isNaN(stock) && stock > 0)) {
+                    const itemDiv = document.createElement('div');
+                    itemDiv.className = 'menu-item';
+                    itemDiv.tabIndex = 0;
+                    itemDiv.setAttribute('aria-label', `${prod.Nombre}, $${prod.Precio}`);
+                    itemDiv.setAttribute('data-item', prod.Nombre);
+                    itemDiv.setAttribute('data-price', prod.Precio);
+
+                    // Imagen
+                    // Se añade una verificación para la URL de la imagen
+                    const img = document.createElement('img');
+                    img.src = prod.Imagen && prod.Imagen.startsWith('http') ? prod.Imagen : 'https://via.placeholder.com/90x70?text=No+Image'; // Placeholder si no hay imagen válida
+                    img.alt = prod.Nombre;
+                    img.className = 'producto-img';
+                    itemDiv.appendChild(img);
+
+                    // Nombre y precio
+                    const h4 = document.createElement('h4');
+                    h4.innerHTML = `${prod.Nombre} <span class="price">$${prod.Precio}</span>`;
+                    itemDiv.appendChild(h4);
+
+                    // Descripción
+                    const p = document.createElement('p');
+                    p.textContent = prod.Descripción;
+                    itemDiv.appendChild(p);
+
+                    // Control de cantidad
+                    const cantidadDiv = document.createElement('div');
+                    cantidadDiv.className = 'cantidad-control';
+                    cantidadDiv.innerHTML = `
+                        <button class="cantidad-btn" aria-label="Restar uno" disabled>-</button>
+                        <span class="cantidad-num">0</span>
+                        <button class="cantidad-btn" aria-label="Sumar uno">+</button>
+                    `;
+                    itemDiv.appendChild(cantidadDiv);
+
+                    catDiv.appendChild(itemDiv);
+                }
+            });
+            menuDiv.appendChild(catDiv);
+        });
+
+        // Vuelve a activar la lógica de selección y cantidad
+        activarControlesMenu();
+    }
+
+    // Lógica de selección y cantidad (igual que antes)
+    function activarControlesMenu() {
+        function actualizarTotal() {
+            const items = document.querySelectorAll('.menu-item');
+            let total = 0;
+            let listaHtml = '';
+            let haySeleccion = false;
+            let resumenForm = '';
+            items.forEach(item => {
+                const cantidad = parseInt(item.querySelector('.cantidad-num').textContent);
+                if (cantidad > 0) {
+                    haySeleccion = true;
+                    item.classList.add('selected');
+                    const nombre = item.getAttribute('data-item');
+                    const precio = parseInt(item.getAttribute('data-price'));
+                    total += precio * cantidad;
+                    listaHtml += `<li>${nombre} x${cantidad} - $${precio * cantidad}</li>`;
+                    resumenForm += `${nombre} x${cantidad} - $${precio * cantidad}<br>`;
+                } else {
+                    item.classList.remove('selected');
+                }
+            });
+            document.getElementById('totalPedidoFlotante').textContent = `Total: $${total}`;
+            document.getElementById('listaPedido').innerHTML = listaHtml || '<li style="color:#eee;">Sin productos</li>';
+            document.getElementById('cartelFlotante').style.display = haySeleccion ? 'block' : 'none';
+
+            // Resumen en el formulario
+            const resumenDiv = document.getElementById('resumenPedidoForm');
+            if (haySeleccion) {
+                resumenDiv.innerHTML = `<strong>Resumen del pedido:</strong><br>${resumenForm}<br><strong>Total: $${total}</strong>`;
+                resumenDiv.style.display = 'block';
+            } else {
+                resumenDiv.style.display = 'none';
+            }
+        }
+
+        document.querySelectorAll('.menu-item').forEach(item => {
+            const btns = item.querySelectorAll('.cantidad-btn');
+            const numSpan = item.querySelector('.cantidad-num');
+            btns[0].addEventListener('click', e => {
+                e.stopPropagation();
+                let cantidad = parseInt(numSpan.textContent);
+                if (cantidad > 0) {
+                    cantidad--;
+                    numSpan.textContent = cantidad;
+                    if (cantidad === 0) btns[0].setAttribute('disabled', 'disabled');
+                }
+                actualizarTotal();
+            });
+            btns[1].addEventListener('click', e => {
+                e.stopPropagation();
+                let cantidad = parseInt(numSpan.textContent);
+                cantidad++;
+                numSpan.textContent = cantidad;
+                btns[0].removeAttribute('disabled');
+                actualizarTotal();
+            });
+            // Accesibilidad: seleccionar con Enter/Espacio
+            item.addEventListener('keydown', function(ev) {
+                if (ev.key === " " || ev.key === "Enter") {
+                    ev.preventDefault();
+                    btns[1].click();
+                }
+            });
+        });
+
+        // Limpiar selección
+        document.getElementById('limpiarSeleccion').addEventListener('click', function() {
+            document.querySelectorAll('.menu-item').forEach(item => {
+                item.querySelector('.cantidad-num').textContent = '0';
+                item.querySelector('.cantidad-btn').setAttribute('disabled', 'disabled');
+                item.classList.remove('selected');
+            });
+            actualizarTotal();
+        });
+
+        // Inicializa el total al cargar
+        actualizarTotal();
+
+        // Ampliar imagen al hacer click
+        document.querySelectorAll('.producto-img').forEach(img => {
+            img.style.cursor = "zoom-in";
+            img.addEventListener('click', function(e) {
+                e.stopPropagation();
+                document.getElementById('imgModal').src = this.src;
+                document.getElementById('imgModal').alt = this.alt;
+                // Centrar vertical y horizontal en todos los dispositivos
+                const modal = document.getElementById('modalImagen');
+                modal.style.display = 'flex';
+                modal.style.alignItems = 'center';
+                modal.style.justifyContent = 'center';
+            });
+        });
+    }
+
+    // Modal cerrar
+    document.getElementById('cerrarModal').onclick = function() {
+        document.getElementById('modalImagen').style.display = 'none';
+    };
+    document.getElementById('modalImagen').onclick = function(e) {
+        if (e.target === this) {
+            this.style.display = 'none';
+        }
+    };
+
+    // Validación y envío del formulario (igual que antes)
+    const form = document.getElementById('customerDetailsForm');
+    form.addEventListener('submit', function(event) {
+        event.preventDefault();
+
+        // Validación de selección
+        const items = document.querySelectorAll('.menu-item');
+        let haySeleccion = false;
+        let orderSummary = 'Pedido:\n';
+        let total = 0;
+        items.forEach(item => {
+            const cantidad = parseInt(item.querySelector('.cantidad-num').textContent);
+            if (cantidad > 0) {
+                haySeleccion = true;
+                const nombre = item.getAttribute('data-item');
+                const precio = parseInt(item.getAttribute('data-price'));
+                orderSummary += `- ${nombre} x${cantidad}: $${precio * cantidad}\n`;
+                total += precio * cantidad;
+            }
+        });
+        if (!haySeleccion) {
+            alert('Por favor, selecciona al menos un artículo del menú.');
+            return;
+        }
+
+        orderSummary += `\nTotal: $${total}\n\n`;
+
+        // Validación de datos del cliente
+        const customerName = document.getElementById('nombre').value.trim();
+        const customerAddress = document.getElementById('direccion').value.trim();
+        const customerPhone = document.getElementById('telefono').value.trim();
+        const paymentMethod = document.getElementById('pago').value;
+        const notas = document.getElementById('notas').value.trim();
+
+        // Validación de teléfono (solo números, 8 a 15 dígitos)
+        if (!/^[0-9]{8,15}$/.test(customerPhone)) {
+            alert('Por favor, ingresa un número de teléfono válido (solo números, entre 8 y 15 dígitos).');
+            document.getElementById('telefono').focus();
+            return;
+        }
+
+        if (!customerName || !customerAddress || !customerPhone || !paymentMethod) {
+            alert('Por favor, completa todos tus datos y selecciona la forma de pago.');
+            return;
+        }
+
+        orderSummary += `Datos del Cliente:\n`;
+        orderSummary += `Nombre: ${customerName}\n`;
+        orderSummary += `Dirección: ${customerAddress}\n`;
+        orderSummary += `Teléfono: ${customerPhone}\n`;
+        orderSummary += `Forma de Pago: ${paymentMethod}\n`;
+        if (notas) {
+            orderSummary += `Notas: ${notas}\n`;
+        }
+
+        const whatsappPhoneNumber = '+5491155841357'; 
+        const encodedMessage = encodeURIComponent(orderSummary);
+        const whatsappUrl = `https://wa.me/${whatsappPhoneNumber}?text=${encodedMessage}`;
+
+        window.open(whatsappUrl, '_blank');
+
+        // Mensaje de éxito
+        document.getElementById('mensajeExito').style.display = 'block';
+        setTimeout(() => {
+            document.getElementById('mensajeExito').style.display = 'none';
+        }, 6000);
+    });
+
+    // Inicia la carga del menú desde Google Sheets
+    cargarProductosDesdeSheets();
+    </script>
+</body>
+</html>
