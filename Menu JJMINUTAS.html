@@ -340,15 +340,7 @@
 
     <script>
     // CONFIGURA TU GOOGLE SHEET
-    // 1. Publica tu hoja de Google Sheets (Archivo > Compartir > Publicar en la web)
-    // 2. Copia el ID de la hoja y el nombre de la hoja (sheet)
-    // 3. Cambia las variables de abajo
-
-    // *** ESTAS VARIABLES HAN SIDO CONFIGURADAS CON LA INFORMACIÓN QUE PROPORCIONASTE ***
-    const SHEET_ID = '1oZlLNwrBNML0JygS7RYeJ9o68kGFdAGB6nYJTAbz7gM'; 
-    const SHEET_NAME = 'Productos';   
-    const SHEET_URL = `https://docs.google.com/spreadsheets/d/e/2PACX-1vSb9oSOgIoDPhTulisFf9sFiNdF_U-YPzDnh1QuF_1KxDQyr7iiu270SN0teTNxeWD9m2WXn5xdn5ex/pubhtml?gid=863348744&single=true`;
-    // *********************************************************************************
+    const SHEET_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSb9oSOgIoDPhTulisFf9sFiNdF_U-YPzDnh1QuF_1KxDQyr7iiu270SN0teTNxeWD9m2WXn5xdn5ex/pub?gid=863348744&single=true&output=csv";
 
     // Cargar productos desde Google Sheets
     async function cargarProductosDesdeSheets() {
@@ -364,6 +356,8 @@
 
         renderizarMenu(productos);
     }
+
+   
 
     // Renderiza el menú agrupado por categoría
     function renderizarMenu(productos) {
@@ -490,7 +484,7 @@
             // Accesibilidad: seleccionar con Enter/Espacio
             item.addEventListener('keydown', function(ev) {
                 if (ev.key === " " || ev.key === "Enter") {
-                    ev.preventDefault();
+                    ev.preventDefault();            
                     btns[1].click();
                 }
             });
